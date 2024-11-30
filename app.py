@@ -28,12 +28,7 @@ def classify_remarks(next_gwa):
 # Default route
 @app.route('/')
 def home():
-    return jsonify({
-        "message": "Unauthorized Personnel Keep Out",
-        "routes": {
-            "POST /predict": "Predict the next GWA based on provided records."
-        }
-    })
+    return 'Unauthorized Personnel Keep Out'
 
 @app.route('/predict', methods=['POST'])
 def predict():
