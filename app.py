@@ -48,12 +48,7 @@ def format_quarter_label(quarter_number):
     
 @app.route('/')
 def home():
-    return jsonify({
-        "message": "Unauthorized Personnel Keep Out",
-        "routes": {
-            "POST /predict": "Predict the next GWA based on provided records."
-        }
-    })
+    return 'SCES Predictive Model'
 
 @app.route('/predict', methods=['POST'])
 def predict():
