@@ -48,7 +48,12 @@ def format_quarter_label(quarter_number):
     
 @app.route('/')
 def home():
-    return 'SCES Predictive Model'
+    return jsonify({
+        "message": "Unauthorized Personnel Keep Out",
+        "routes": {
+            "POST /predict": "Predict the next GWA based on provided records."
+        }
+    })
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -190,7 +195,6 @@ def interpret_grades():
             })
 
         if subject_filter == "All":
-            # Check if all grades are the same
             if all(grade == bar_data[0] for grade in bar_data):
                 if bar_data[0] < 80:
                     interpretation = "The student has difficulties in all subjects."
@@ -201,94 +205,60 @@ def interpret_grades():
                 })
 
             if quarter_filter == "All":
-                # Determine highest and lowest grades
                 max_index = bar_data.index(max(bar_data))
                 min_index = bar_data.index(min(bar_data))
                 interpretation = (
                     f"The student excels in {labels[max_index]} "
                     f"and has difficulties in {labels[min_index]}."
                 )
-            else:  # quarter_filter != "All"
+            else:
                 max_index = bar_data.index(max(bar_data))
                 min_index = bar_data.index(min(bar_data))
                 interpretation = (
                     f"In the {quarter_filter} quarter, the student excels in {labels[max_index]} "
                     f"and has difficulties in {labels[min_index]}."
                 )
-        else:  # subject_filter != "All"
-            if quarter_filter == "All":
-                trends = []
-                overall_trend = 0
+        else:
+            trends = []
+            overall_trend = 0
 
-                # Analyze trends across data
-                for i in range(1, len(bar_data)):
-                    grade_from = labels[i - 1]
-                    grade_to = labels[i]
-                    score_from = bar_data[i - 1]
-                    score_to = bar_data[i]
-                    diff = score_to - score_from
-                    overall_trend += diff
+            for i in range(1, len(bar_data)):
+                grade_from = labels[i - 1]
+                grade_to = labels[i]
+                score_from = bar_data[i - 1]
+                score_to = bar_data[i]
+                diff = score_to - score_from
+                overall_trend += diff
 
-                    if diff > 0:
-                        trends.append(
-                            f"An improvement of grades from {score_from} to {score_to} in {grade_to}"
-                        )
-                    elif diff < 0:
-                        trends.append(
-                            f"A decline of grades from {score_from} to {score_to} in {grade_to}"
-                        )
-                    else:
-                        trends.append(
-                            f"No changes in grades between {score_from} in {grade_from} and {score_to} in {grade_to}"
-                        )
+                if diff > 0:
+                    trends.append(
+                        f"An improvement of grades from {score_from} to {score_to} in {grade_to}."
+                    )
+                elif diff < 0:
+                    trends.append(
+                        f"A decline of grades from {score_from} to {score_to} in {grade_to}."
+                    )
+                else:
+                    trends.append(
+                        f"No changes in grades between {score_from} in {grade_from} and {score_to} in {grade_to}."
+                    )
 
-                overall_message = (
-                    "an overall improvement in performance."
-                    if overall_trend > 0 else
-                    "an overall decline in performance."
-                    if overall_trend < 0 else
-                    "no significant change in performance."
-                )
-                interpretation = (
-                    f"The bar graph depicts: {' '.join(trends)}. "
-                    f"Overall, the student exhibits {overall_message}"
-                )
-            else:  # subject_filter != "All" and quarter_filter != "All"
-                trends = []
-                overall_trend = 0
+            overall_message = (
+                "an overall improvement in performance."
+                if overall_trend > 0 else
+                "an overall decline in performance."
+                if overall_trend < 0 else
+                "no significant change in performance."
+            )
 
-                for i in range(1, len(bar_data)):
-                    grade_from = labels[i - 1]
-                    grade_to = labels[i]
-                    score_from = bar_data[i - 1]
-                    score_to = bar_data[i]
-                    diff = score_to - score_from
-                    overall_trend += diff
+            trends_message = ' '.join(trends) if trends else ""
+            if trends_message:
+                trends_message += " "  # Add a space after trends for proper separation
 
-                    if diff > 0:
-                        trends.append(
-                            f"An improvement of grades from {score_from} to {score_to} in {grade_to}"
-                        )
-                    elif diff < 0:
-                        trends.append(
-                            f"A decline of grades from {score_from} to {score_to} in {grade_to}"
-                        )
-                    else:
-                        trends.append(
-                            f"No changes in grades between {score_from} in {grade_from} and {score_to} in {grade_to}"
-                        )
-
-                overall_message = (
-                    "an overall improvement in performance."
-                    if overall_trend > 0 else
-                    "an overall decline in performance."
-                    if overall_trend < 0 else
-                    "no significant change in performance."
-                )
-                interpretation = (
-                    f"The bar graph depicts: {' '.join(trends)}. "
-                    f"Overall, the student exhibits {overall_message}"
-                )
+            interpretation = (
+                f"The bar graph depicts: {trends_message}"
+                f"Overall, the student exhibits {overall_message}"
+            )
 
         return jsonify({
             "interpretation": interpretation
@@ -296,6 +266,7 @@ def interpret_grades():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/interpret-subject', methods=['POST'])
 def interpret_subject():
@@ -342,25 +313,51 @@ def interpret_subject():
         # Interpretation logic
         interpretation = ""
         if len(bar_data) > 1:
-            changes = []
-            for i in range(1, len(bar_data)):
-                changes.append(bar_data[i] - bar_data[i - 1])
+            # Exclude the predicted grade from comparisons
+            actual_grades = bar_data[:-1] if predicted_grade is not None else bar_data
+            grade_differences = []
+            for i in range(1, len(actual_grades)):
+                diff = actual_grades[i] - actual_grades[i - 1]
+                grade_differences.append(diff)
 
-            all_positive_or_zero = all(change >= 0 for change in changes)
-            all_negative_or_zero = all(change <= 0 for change in changes)
-            all_zero_changes = all(change == 0 for change in changes)
+            # Create detailed interpretation for each quarter
+            quarter_differences = []
+            for i, diff in enumerate(grade_differences):
+                if diff > 0:
+                    quarter_differences.append(
+                        f"The grade improved by {diff} from {labels[i]} to {labels[i + 1]}."
+                    )
+                elif diff < 0:
+                    quarter_differences.append(
+                        f"The grade dropped by {abs(diff)} from {labels[i]} to {labels[i + 1]}."
+                    )
+                else:
+                    quarter_differences.append(
+                        f"The grade remained the same between {labels[i]} and {labels[i + 1]}."
+                    )
 
-            if all_zero_changes:
-                interpretation = "The student's grades have remained consistent across quarters."
-            elif all_positive_or_zero:
-                interpretation = "The student's grades have shown consistent improvement across quarters."
-            elif all_negative_or_zero:
-                interpretation = "The student's grades have consistently declined across quarters."
-            else:
-                interpretation = "The student's grades have varied across quarters."
+            # Add quarter-based comparisons
+            interpretation += " ".join(quarter_differences)
 
+            # Add the predicted grade message
             if predicted_grade is not None:
                 interpretation += f" The predicted grade for the next quarter is {predicted_grade}."
+
+            # Add overall summary message
+            all_positive_or_zero = all(diff >= 0 for diff in grade_differences)
+            all_negative_or_zero = all(diff <= 0 for diff in grade_differences)
+            all_zero_changes = all(diff == 0 for diff in grade_differences)
+
+            if all_zero_changes:
+                overall_message = "Overall, the student's grades remained consistent across quarters."
+            elif all_positive_or_zero:
+                overall_message = "Overall, the student's grades have shown an improvement in the subject across quarters."
+            elif all_negative_or_zero:
+                overall_message = "Overall, the student's grades have shown a decline in the subject across quarters."
+            else:
+                overall_message = "Overall, the student's grades varied across quarters."
+
+            interpretation += f" {overall_message}"
         else:
             interpretation = "Insufficient number of grades to determine trends."
 
@@ -376,6 +373,8 @@ def interpret_subject():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 @app.route('/interpret-gwa', methods=['POST'])
 def interpret_gwa():
