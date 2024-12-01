@@ -26,15 +26,6 @@ def classify_remarks(next_gwa):
         return "Did Not Meet Expectations"
 
 def format_quarter_label(quarter_number):
-    """
-    Formats the quarter label based on the given quarter number.
-
-    Args:
-        quarter_number (int): The quarter number to format.
-
-    Returns:
-        str: The formatted quarter label.
-    """
     if quarter_number == 1:
         return "1st Quarter"
     elif quarter_number == 2:
@@ -48,12 +39,7 @@ def format_quarter_label(quarter_number):
     
 @app.route('/')
 def home():
-    return jsonify({
-        "message": "Unauthorized Personnel Keep Out",
-        "routes": {
-            "POST /predict": "Predict the next GWA based on provided records."
-        }
-    })
+    return "SCES ML Model Hosted By Render"
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -296,6 +282,10 @@ def interpret_subject():
 
                 average_change = sum(changes) / len(changes)
                 predicted_grade = round(bar_data[-1] + average_change)
+
+                # Cap the predicted grade at 100
+                predicted_grade = min(predicted_grade, 100)
+
                 bar_data.append(predicted_grade)
 
                 next_quarter_label = format_quarter_label(len(labels) + 1)
@@ -373,7 +363,6 @@ def interpret_subject():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 @app.route('/interpret-gwa', methods=['POST'])
