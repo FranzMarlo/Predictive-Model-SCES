@@ -231,9 +231,9 @@ def interpret_grades():
                     )
 
             overall_message = (
-                "an overall improvement in performance."
+                "an improvement in performance."
                 if overall_trend > 0 else
-                "an overall decline in performance."
+                "a decline in performance."
                 if overall_trend < 0 else
                 "no significant change in performance."
             )
