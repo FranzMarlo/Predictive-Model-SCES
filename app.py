@@ -36,7 +36,11 @@ def format_quarter_label(quarter_number):
         return "4th Quarter"
     else:
         return f"Quarter {quarter_number}"
-    
+        
+@app.route('/ping', methods=['GET'])
+def ping():
+    return "Access Not Allowed", 200
+
 @app.route('/')
 def home():
     return "SCES ML Model Hosted By Render"
