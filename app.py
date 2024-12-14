@@ -241,24 +241,23 @@ def interpret_grades():
                 return jsonify({
                     "initial": f"The student has only one grade ({single_grade}) available for analysis in the subject.",
                     "trends": [],
-                    "overall_message": "With only one grade, trends cannot be established. Focus on monitoring performance in subsequent evaluations."
+                    "overall_message": "With only one grade, trends cannot be established."
                 }), 200
 
             # Rest of the logic for multiple grades continues below
             if quarter_filter == "All":
                 initial = "Based on the analysis of the student's grade on the subject across grade levels, the following insights were identified:"
             else:
-                initial = f"Based on the analysis of the student's grade on the subject during " + quarter_filter + " Quarter across grade levels, the following insights were identified:"
-            
-            # Process trends and overall message as usual
+                initial = f"Based on the analysis of the student's grade on the subject during {quarter_filter} Quarter across grade levels, the following insights were identified:"
 
-            if quarter_filter == "All":
-                initial = "Based on the analysis of the student's grade on the subject across grade levels, the following insights were identified:"
-            else:
-                initial = f"Based on the analysis of the student's grade on the subject during " + quarter_filter + " Quarter across grade levels, the following insights were identified:"
+            # Initialize trend counters
+            improvements = 0
+            declines = 0
+            no_changes = 0
             trends = []
             overall_trend = 0
 
+            # Analyze grade trends
             for i in range(1, len(bar_data)):
                 grade_from = labels[i - 1]
                 grade_to = labels[i]
@@ -268,22 +267,36 @@ def interpret_grades():
                 overall_trend += diff
 
                 if diff > 0:
+                    improvements += 1
                     trends.append(f"An improvement of grades from {score_from} to {score_to} in {grade_to}.")
                 elif diff < 0:
+                    declines += 1
                     trends.append(f"A decline of grades from {score_from} to {score_to} in {grade_to}.")
                 else:
+                    no_changes += 1
                     trends.append(f"No changes in grades between {score_from} in {grade_from} and {score_to} in {grade_to}.")
 
-            overall_message = (
-                "Overall, the student showed an improvement in performance on the subject. "
-                "Continue to foster effective learning environments and recognize the student's efforts, while introducing advanced learning opportunities to sustain improvement."
-                if overall_trend > 0 else
-                "Overall, the student showed a decline in performance on the subject. "
-                "Focus closely on the student to identify underlying issues and implement strategies for improvement, such as personalized learning plans or additional support."
-                if overall_trend < 0 else
-                "Overall, there are no significant changes in the performance of the student on the subject. "
-                "Motivate the student to aim for higher achievement by setting challenging yet attainable goals and providing encouragement."
-            )
+            # Determine overall message based on trend counts
+            if improvements > declines:
+                overall_message = (
+                    "Overall, the student showed an improvement in performance on the subject. "
+                    "Continue to foster effective learning environments and recognize the student's efforts, while introducing advanced learning opportunities to sustain improvement."
+                )
+            elif declines > improvements:
+                overall_message = (
+                    "Overall, the student showed a decline in performance on the subject. "
+                    "Focus closely on the student to identify underlying issues and implement strategies for improvement, such as personalized learning plans or additional support."
+                )
+            elif improvements == declines and (improvements > 0 or declines > 0):
+                overall_message = (
+                    "Overall, the student's performance fluctuated across grade levels. "
+                    "Encourage consistent efforts and provide support to achieve steady progress."
+                )
+            else:
+                overall_message = (
+                    "Overall, there are no significant changes in the performance of the student on the subject. "
+                    "Motivate the student to aim for higher achievement by setting challenging yet attainable goals and providing encouragement."
+                )
 
             response = {
                 "initial": initial,
@@ -291,6 +304,7 @@ def interpret_grades():
                 "overall_message": overall_message
             }
             return jsonify(response), 200
+
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
