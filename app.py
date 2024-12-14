@@ -192,7 +192,7 @@ def interpret_grades():
 
         if len(bar_data) < 2:
             return jsonify({
-                "interpretation": "Only one grade is available to perform analysis."
+                "interpretation": "Only one grade is available, cannot perform analysis."
                 if len(bar_data) == 1 else "No grade data available for analysis."
             }), 200
 
@@ -353,12 +353,12 @@ def interpret_subject():
             elif all_negative_or_zero:
                 overall_message = (
                     "The student's grades have gone down each quarter. This could mean that the student is facing challenges. "
-                    "Consider providing extra support and identify the specific lessons in " + subject_name + " where the students need help."
+                    "Consider providing extra support and identify the specific lessons in " + subject_name + " where the student needs help."
                 )
             else:
                 overall_message = (
                     "The student's grades have been unstable across quarters. This shows inconsistent performance. "
-                    "Helping the student build better study routines and monitoring progress can lead to steady improvement in " + subject_name + "."
+                    "Helping the student build better study routines and monitoring progress can lead to steady improvement in the subject."
                 )
         else:
             overall_message = "Not enough data is available to provide insights into the student's performance over time."
