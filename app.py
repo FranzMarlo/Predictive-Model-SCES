@@ -227,6 +227,31 @@ def interpret_grades():
             return jsonify({"interpretation": interpretation}), 200
 
         else:
+            if not bar_data:
+                # No grade data available for the specific subject
+                return jsonify({
+                    "initial": "No grade data is available for this subject.",
+                    "trends": [],
+                    "overall_message": "No performance trends can be analyzed without sufficient data."
+                }), 200
+
+            if len(bar_data) == 1:
+                # Only one grade is available for the specific subject
+                single_grade = bar_data[0]
+                return jsonify({
+                    "initial": f"The student has only one grade ({single_grade}) available for analysis in the subject.",
+                    "trends": [],
+                    "overall_message": "With only one grade, trends cannot be established. Focus on monitoring performance in subsequent evaluations."
+                }), 200
+
+            # Rest of the logic for multiple grades continues below
+            if quarter_filter == "All":
+                initial = "Based on the analysis of the student's grade on the subject across grade levels, the following insights were identified:"
+            else:
+                initial = f"Based on the analysis of the student's grade on the subject during " + quarter_filter + " Quarter across grade levels, the following insights were identified:"
+            
+            # Process trends and overall message as usual
+
             if quarter_filter == "All":
                 initial = "Based on the analysis of the student's grade on the subject across grade levels, the following insights were identified:"
             else:
