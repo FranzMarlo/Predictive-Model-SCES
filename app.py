@@ -185,18 +185,18 @@ def interpret_grades():
         labels = data.get('labels', [])
         bar_data = data.get('bar_data', [])
 
-        if not labels or not bar_data:
-            return jsonify({
-                "interpretation": "No data available to analyze."
-            }), 200
-
-        if len(bar_data) < 2:
-            return jsonify({
-                "interpretation": "Only one grade is available, cannot perform analysis."
-                if len(bar_data) == 1 else "No grade data available for analysis."
-            }), 200
-
         if subject_filter == "All":
+            if not labels or not bar_data:
+                return jsonify({
+                    "interpretation": "No data available to analyze."
+                }), 200
+
+            if len(bar_data) < 2:
+                return jsonify({
+                    "interpretation": "Only one grade is available, cannot perform analysis."
+                    if len(bar_data) == 1 else "No grade data available for analysis."
+                }), 200
+            
             if all(grade == bar_data[0] for grade in bar_data):
                 if bar_data[0] < 80:
                     interpretation = (
