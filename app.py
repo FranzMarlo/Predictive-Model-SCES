@@ -199,7 +199,7 @@ def interpret():
             recommendation = get_random_decline_recommendation()
             warning = 0
         else:
-            overall_message = "The student's academic performance has remained stable without significant changes."
+            overall_message = "The student's academic performance has fluctuated prior to changes."
             recommendation = get_random_stable_recommendation()
             warning = 2
 
