@@ -334,14 +334,14 @@ def interpret_grades():
             min_index = bar_data.index(min(bar_data))
             strength = f"{labels[max_index]}"
             weakness = f"{labels[min_index]}"
-            if max_index == min_index & min(bar_data) >= 80:
-                interpretation = ("The student's average grades on all subject are decent. Unable to identify the strength and weakness subject of the student")
+            if max(bar_data) == min(bar_data) & min(bar_data) >= 80:
+                interpretation = ("The student's average grades on all subject are decent. Unable to identify the strength and weakness subject of the student.")
                 recommendation = get_random_all_decent_recommendation()
                 warning = 1
                 strength = 0
                 weakness = 0
-            elif max_index == min_index & min(bar_data) < 80:
-                interpretation = ("The student has an average grade below 80 for subject. Unable to identify the strength and weakness subject of the student")
+            elif max(bar_data) == min(bar_data) & min(bar_data) < 80:
+                interpretation = ("The student has an average grade below 80 for subject. Unable to identify the strength and weakness subject of the student.")
                 recommendation = get_random_all_decline_recommendation(labels[min_index])
                 warning = 0
                 strength = 0
