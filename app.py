@@ -276,7 +276,7 @@ def interpret_grades():
                 "Collaborate with parents or guardians to establish a consistent support system, sharing actionable strategies to reinforce learning at home and in school.",
                 "Incorporate innovative teaching techniques, such as gamified learning, multimedia tools, or real-life applications of concepts, to make lessons more engaging and relatable to the student.",
                 "Track the student’s progress through regular assessments and adjust teaching strategies or intervention plans based on emerging performance data.",
-                "Introduce a rewards system that recognizes effort and improvement, fostering a positive learning environment and building the student’s confidence in their abilities.",
+                "Introduce rewards to the class that recognizes effort and improvement, fostering a positive learning environment and building the student’s confidence in their abilities.",
                 "Develop a personalized and time-bound study plan, prioritizing topics that require immediate attention while building on the student’s existing knowledge base.",
                 "Collaborate with fellow educators to exchange insights, share best practices, and implement cohesive strategies for supporting the student's academic recovery and growth."
             ]
@@ -341,8 +341,8 @@ def interpret_grades():
                 strength = 0
                 weakness = 0
             elif max(bar_data) == min(bar_data) & min(bar_data) < 80:
-                interpretation = ("The student has an average grade below 80 for subject. Unable to identify the strength and weakness subject of the student.")
-                recommendation = get_random_all_decline_recommendation(labels[min_index])
+                interpretation = ("The student's average grades on all subject are declining. Unable to identify the strength and weakness subject of the student.")
+                recommendation = generate_subject_decline_recommendation()
                 warning = 0
                 strength = 0
                 weakness = 0
